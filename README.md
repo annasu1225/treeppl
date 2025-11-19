@@ -10,7 +10,7 @@ Tested on
 - Ubuntu 22.04.1 LTS
 - M1 and M2 Macs
 
-For installation guidelines, go to TreePPL [website](https://treeppl.org/docs/Howtos#installation-guides)
+For installation guidelines, go to TreePPL [website](https://treeppl.org/getting-started/getting-started)
 
 ## About TreePPL
 
