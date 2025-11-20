@@ -1,3 +1,7 @@
+# This is a fork for CPSC7260 class presentation at Yale.
+See inference.ipynb for CRBD example and DNA sequence tree reconstruction example. 
+See basic.wppl for a simple simulation of the evolution of a binary trait over continuous time.
+
 # TreePPL – A Universal Probabilistic Programming Language for Evolutionary Biology
 
 ## Installation
