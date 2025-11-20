@@ -1,0 +1,64 @@
+/* Annotated code from https://github.com/phyppl/probabilistic-programming/blob/master/webppl/phywppl/examples/basic.wppl
+ * paste the following in the sandbox on http://webppl.org to run
+ */
+
+// This function simulates the evolution of a binary trait—0 or 1—over continuous time.
+// Start at some state, 0 or 1
+var evolve = function( { time:       t,
+                         startState: s,
+                         switchRate: r } ) {
+
+  // Sample the waiting time until the next switch from an 
+  // exponential distribution with rate r
+  var waitingTime = sample( Exponential( { a:r } ) )
+
+  // If the waiting time exceeds the branch length, no change happens.
+  // return the current state
+  if ( waitingTime >= t )
+    return s
+  
+  // O.w. the trait switches to the opposite state at a Poisson rate r, 
+  // update the time, and recersively continue
+  return( evolve( { time:       t - waitingTime,
+                    startState: 1 - s,
+                    switchRate: r } ) )
+}
+
+var binaryCharacterModel = function() {
+  // Assign a prior on the root state: equally likely to be 0 or 1.
+  var rootState = sample( Categorical( { ps: [0.5, 0.5],
+                                         vs: [0, 1] } ) )
+  // Simulate evolution down a single branch of 10 time units. 
+  // The switching rate 0.05 means on one trait switch / 20 time units on average.
+  var endState = evolve( { time:       10.0,
+                           startState: rootState,
+                           switchRate: 0.05 } )
+  
+  // Assume observed tip state is 1
+  var observedState = 1
+  
+  // With probability 0.9, the observed state equals the true state
+  // With probability 0.1, we misobserve it
+  var dist = Categorical( { ps: [ 0.9, 0.1 ],
+                            vs: [ endState, 1 - endState  ] } )
+  
+  // Conditioning step:
+  // down-weights particles where the simulated end state disagrees with 
+  // the observed state
+  observe(dist, observedState)
+
+  return rootState
+}
+
+// Infer the posterior distribution of the root state given the observed tip state
+// Simulate 10,000 possible evolutionary histories with SMC
+// Each particle samples a root state, simulates evolution, 
+// and is weighted based on how well it matches the observed data
+// After resampling, we get a posterior distribution over the root state
+var dist = Infer( { method: 'SMC', particles: 10000, rejuvSteps: 5,
+         model: binaryCharacterModel } )
+
+// Plot shows: 
+// Given a noisy observation of ‘1’ at the tip, 
+// what is the probability that the root was 0 or 1
+viz(dist)
